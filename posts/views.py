@@ -1,14 +1,12 @@
 import datetime as dt
 
-from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .models import  Comment, Follow, Group, Post
-from .forms import PostForm, CommentForm
-
+from .forms import CommentForm, PostForm
+from .models import Comment, Follow, Group, Post
 
 User = get_user_model()
 
@@ -44,7 +42,7 @@ def profile(request, username):
     return render(
         request, 'profile.html',
         {'page': page, 'paginator': paginator, 'post_count': post_count, 'following': following,
-        'author': author, 'fwers_count': fwers_count, 'fwing_count': fwing_count}
+         'author': author, 'fwers_count': fwers_count, 'fwing_count': fwing_count}
         )
 
 
@@ -78,8 +76,8 @@ def post_view(request, username, post_id):
     return render(
         request, 'post.html',
         {'post': post, 'post_count': post_count, 'post_id': post_id,
-        'author': author, 'form': form, 'items': items, 'fwers_count': fwers_count,
-        'fwing_count': fwing_count, 'following': following,}
+         'author': author, 'form': form, 'items': items, 'fwers_count': fwers_count,
+         'fwing_count': fwing_count, 'following': following, }
         )
 
 
@@ -124,7 +122,7 @@ def follow_index(request):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(
-        request, "follow.html", 
+        request, "follow.html",
         {'post_list': post_list, 'page': page, 'paginator': paginator}
         )
 
@@ -148,7 +146,6 @@ def profile_unfollow(request, username):
 @login_required
 def add_comment(request, username, post_id):
     form = CommentForm(request.POST)
-    post = get_object_or_404(Post, id=post_id)
     if form.is_valid():
         add_comment = form.save(commit=False)
         add_comment.post = get_object_or_404(Post, id=post_id)
@@ -161,12 +158,12 @@ def year(request):
     date = dt.datetime.now().year
     return {'year': date}
 
-    
+
 def page_not_found(request, exception):
     return render(
-        request, 
-        "misc/404.html", 
-        {"path": request.path}, 
+        request,
+        "misc/404.html",
+        {"path": request.path},
         status=404
     )
 

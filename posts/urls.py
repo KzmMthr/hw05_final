@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.conf.urls import handler404, handler500
+from django.conf.urls.static import static
 from django.urls import path
 
 from . import views
@@ -16,14 +16,14 @@ urlpatterns = [
          views.post_edit, name='post_edit'
          ),
     path("<username>/<int:post_id>/comment", views.add_comment, name="add_comment"),
-    path("<str:username>/follow/", views.profile_follow, name="profile_follow"), 
+    path("<str:username>/follow/", views.profile_follow, name="profile_follow"),
     path("<str:username>/unfollow/", views.profile_unfollow, name="profile_unfollow"),
     path('404/', views.page_not_found, name='404'),
     path('500/', views.server_error, name='500'),
 ]
 
-handler404 = "posts.views.page_not_found" #noqa
-handler500 = "posts.views.server_error" #noqa
+handler404 = "posts.views.page_not_found" # noqa
+handler500 = "posts.views.server_error" # noqa
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,7 +1,4 @@
-import datetime as dt
-from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.core.files import File
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -19,11 +16,6 @@ class ProfileTest(TestCase):
         self.user = User.objects.create_user(username='new_user', email='ya@ya.ru', password='12345')
         self.user_1 = User.objects.create_user(username='TestUser_1', password='test1')
         self.user_2 = User.objects.create_user(username='TestUser_2', password='test2')
-        #Post.objects.create(text='Тестовый пост user1_1', author=self.user_1)
-        #Post.objects.create(text='Тестовый пост user1_2', author=self.user_1)
-        #Post.objects.create(text='Тестовый пост user2_1', author=self.user_2)
-        #Post.objects.create(text='Тестовый пост user2_2', author=self.user_2)
-        #Post.objects.create(text='Тестовый пост user2_3', author=self.user_2)
         self.client_logged.force_login(self.user)
         self.client_logged_1.force_login(self.user_1)
         self.client_logged_2.force_login(self.user_2)
@@ -77,7 +69,7 @@ class ProfileTest(TestCase):
             if test_posts.id == self.post.id:
                 test_posts_text = test_posts.text
         self.assertEqual(f'{self.post.id}', test_posts_text)
-        
+
     def test_unauthorized_user_create_post(self):
         count_posts = Post.objects.all().count()
         response = self.client_unlogged.post(
@@ -86,8 +78,8 @@ class ProfileTest(TestCase):
         count_posts_after_post = Post.objects.all().count()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(count_posts, count_posts_after_post)
-        
-    def test_unauthorized_user_edit_post(self): 
+
+    def test_unauthorized_user_edit_post(self):
         response = self.client_unlogged.get(
             reverse('post_edit', kwargs={'username': self.user.username, 'post_id': self.post.id, }))
         self.assertEqual(response.status_code, 302)
@@ -95,13 +87,13 @@ class ProfileTest(TestCase):
     def test_404(self):
         response = self.client_unlogged.get('getmethe404pageplease')
         self.assertEqual(response.status_code, 404)
-        
+
     def test_new_post_with_img(self):
-        with open('media/posts/horosh.png','rb') as img:
+        with open('media/posts/horosh.png', 'rb') as img:
             response = self.client_logged.post(
-                reverse('new_post'), 
+                reverse('new_post'),
                 {'author': self.user, 'text': 'post with image',
-                'image': img, 'group': self.group.id, }, follow=True
+                 'image': img, 'group': self.group.id, }, follow=True
                 )
         response = self.client_logged.get(reverse('index'))
         self.assertEqual('post with image', response.context['page'][0].text)
@@ -114,7 +106,7 @@ class ProfileTest(TestCase):
         for url in test_urls:
             response = self.client_logged.get(url)
             self.assertIn('<img'.encode(), response.content)
-            
+
     def test_active_user_following_unfollowing(self):
         response = self.client_logged.get(reverse('profile_follow', args=(self.user_1.username,)), follow=True)
         self.assertEqual(response.context['fwers_count'], 1)
@@ -138,19 +130,12 @@ class ProfileTest(TestCase):
             text='Тестовый пост для проверки комментировать только авторизованному юзеру', author=self.user_1,
         )
         response = self.client_unlogged.get(
-            reverse('post', kwargs={'username': self.user_1.username, 'post_id': self.post.id,}),
+            reverse('post', kwargs={'username': self.user_1.username, 'post_id': self.post.id, }),
             follow=True
             )
         self.assertNotIn('Добавить комментарий:', response.content.decode())
         response = self.client_logged.post(
-            reverse('add_comment', kwargs={'username': self.user_1.username, 'post_id': self.post.id,}),
+            reverse('add_comment', kwargs={'username': self.user_1.username, 'post_id': self.post.id, }),
             data={'text': 'Новый коммент123!@#!'}, follow=True
             )
-        self.assertIn('Новый коммент123!@#!',response.content.decode())
-    
-
-        
-
-    
-        
-    
+        self.assertIn('Новый коммент123!@#!', response.content.decode())

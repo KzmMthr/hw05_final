@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-
 User = get_user_model()
 
 
@@ -22,8 +21,7 @@ class Post(models.Model):
         Group, on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Group',
         related_name='posts',
     )
-    image = models.ImageField(upload_to='posts/', blank=True, null=True) 
-
+    image = models.ImageField(upload_to='posts/', blank=True, null=True)
 
     class Meta:
         ordering = ['-pub_date']
@@ -33,7 +31,9 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=False, verbose_name='Post', related_name='comments',)
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, blank=False, verbose_name='Post', related_name='comments',
+        )
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(max_length=2000)
     created = models.DateTimeField(auto_now_add=True)
@@ -45,4 +45,3 @@ class Comment(models.Model):
 class Follow(models.Model):
     user = models.ForeignKey(User, verbose_name='User', related_name='follower', on_delete=models.CASCADE)
     author = models.ForeignKey(User, verbose_name='Author', related_name='following', on_delete=models.CASCADE)
-    
