@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Follow, Group, Post
@@ -11,6 +12,7 @@ from .models import Comment, Follow, Group, Post
 User = get_user_model()
 
 
+@cache_page(20)
 def index(request):
     post_list = Post.objects.order_by('-pub_date').all()
     paginator = Paginator(post_list, 10)
@@ -26,23 +28,20 @@ def index(request):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     following = None
-    if request.user.is_active:
-        user = request.user
-        if Follow.objects.filter(user=user, author=author):
+    if request.user != author and request.user.is_active:
+        if Follow.objects.filter(user=request.user, author=author):
             following = True
         else:
             following = False
     post_list = Post.objects.filter(author=author)
     post_count = Post.objects.filter(author=author).count()
-    fwers_count = Follow.objects.filter(author=author).count()
-    fwing_count = Follow.objects.filter(user=author).count()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(
         request, 'profile.html',
         {'page': page, 'paginator': paginator, 'post_count': post_count, 'following': following,
-         'author': author, 'fwers_count': fwers_count, 'fwing_count': fwing_count}
+         'author': author, }
         )
 
 
@@ -64,20 +63,15 @@ def post_view(request, username, post_id):
     post_count = Post.objects.filter(author=author).count()
     form = CommentForm(request.POST)
     items = Comment.objects.filter(post=post)
-    fwers_count = Follow.objects.filter(author=author).count()
-    fwing_count = Follow.objects.filter(user=author).count()
     following = None
     if request.user.is_active:
         user = request.user
         if Follow.objects.filter(user=user, author=author):
             following = True
-        else:
-            following = False
     return render(
         request, 'post.html',
         {'post': post, 'post_count': post_count, 'post_id': post_id,
-         'author': author, 'form': form, 'items': items, 'fwers_count': fwers_count,
-         'fwing_count': fwing_count, 'following': following, }
+         'author': author, 'form': form, 'items': items, }
         )
 
 
@@ -113,11 +107,8 @@ def new_post(request):
 
 @login_required
 def follow_index(request):
-    authors = Follow.objects.select_related('author').filter(user=request.user)
-    author_list = []
-    for auth in authors:
-        author_list.append(auth.author)
-    post_list = Post.objects.filter(author__in=author_list).order_by('-pub_date')
+    authors = Follow.objects.select_related('author').filter(user=request.user).values_list('author')
+    post_list = Post.objects.filter(author__in=authors).order_by('-pub_date')
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -131,7 +122,7 @@ def follow_index(request):
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     user = request.user
-    if not Follow.objects.filter(user=user, author=author) and user != author:
+    if not Follow.objects.filter(user=user, author=author).exists() and author != user:
         Follow.objects.create(user=request.user, author=author)
     return redirect('profile', username)
 

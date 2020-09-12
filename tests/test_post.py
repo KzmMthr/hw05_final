@@ -134,6 +134,6 @@ class TestPostEditView:
             'Проверьте, что со страницы `/<username>/<post_id>/edit/` после создания поста перенаправляете на страницу поста'
         post = Post.objects.filter(author=post_with_group.author, text=text, group=post_with_group.group).first()
         assert post is not None, \
-            'Проверьте, что вы изминили пост при отправки формы на странице `/<username>/<post_id>/edit/`'
+            'Проверьте, что вы изменили пост при отправки формы на странице `/<username>/<post_id>/edit/`'
         assert response.url.startswith(f'/{post_with_group.author.username}/{post_with_group.id}'),\
             'Проверьте, что перенаправляете на страницу поста `/<username>/<post_id>/`'

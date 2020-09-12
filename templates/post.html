@@ -18,8 +18,8 @@
                         <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
                                         <div class="h6 text-muted">
-                                        Подписчиков: {{ fwers_count }} <br />
-                                        Подписан: {{ fwing_count }}
+                                        Подписчиков: {{ author.following.count }} <br />
+                                        Подписан: {{ author.followers.count }}
                                         </div>
                                 </li>
                                 <li class="list-group-item">
@@ -27,29 +27,29 @@
                                             Записей: {{ post_count }}
                                         </div>
                                 </li>
-                                {% if following != None %}
-                                <li class="list-group-item">
-                                    {% if following %}
-                                    <a class="btn btn-lg btn-light" 
-                                            href="{% url 'profile_unfollow' author %}" role="button"> 
-                                            Отписаться 
-                                    </a> 
-                                    {% else %}
-                                    <a class="btn btn-lg btn-primary" 
-                                            href="{% url 'profile_follow' author %}" role="button">
-                                    Подписаться 
-                                    </a>
+                                {% if following is not None  %}
+                                    <li class="list-group-item">
+                                        {% if following %}
+                                        <a class="btn btn-lg btn-light" 
+                                                href="{% url 'profile_unfollow' author %}" role="button"> 
+                                                Отписаться 
+                                        </a> 
+                                        {% else %}
+                                        <a class="btn btn-lg btn-primary" 
+                                                href="{% url 'profile_follow' author %}" role="button">
+                                        Подписаться 
+                                        </a>
+                                        {% endif %}
                                     {% endif %}
-                                {% endif %}
                                 </li>
                         </ul>
                 </div>
         </div>
         <div class="col-md-9">
-                {% include "post_item.html" with post=post %}
+                {% include "include/post_item.html" with post=post %}
      </div>
     </div>
 </main>
 <hr>
-{% include 'comments.html' %}
+{% include 'include/comments.html' %}
 {% endblock %}

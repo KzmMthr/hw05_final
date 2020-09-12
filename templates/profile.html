@@ -18,8 +18,8 @@
                             <ul class="list-group list-group-flush">
                                     <li class="list-group-item">
                                             <div class="h6 text-muted">
-                                            Подписчиков: {{ fwers_count }} <br />
-                                            Подписан: {{ fwing_count }}
+                                            Подписчиков: {{ author.following.count }} <br />
+                                            Подписан: {{ author.follower.count }}
                                             </div>
                                     </li>
                                     <li class="list-group-item">
@@ -27,7 +27,7 @@
                                                 Записей: {{ post_count }}
                                             </div>
                                     </li>
-                                    {% if following != None %}
+                                    {% if following is not None  %}
                                     <li class="list-group-item">
                                         {% if following %}
                                         <a class="btn btn-lg btn-light" 
@@ -76,13 +76,13 @@
                     </div>
                     {%endif%}
                     {% if forloop.counter > 1 %}
-                    {% include "post_item.html" with post=post %}
+                    {% include "include/post_item.html" with post=post %}
                     {% if not forloop.last %}<hr>{% endif %}
                     {%endif%}
                 {% endfor %}
 
                 {% if page.has_other_pages %}
-                    {% include "paginator.html" with items=page paginator=paginator %}
+                    {% include "include/paginator.html" with items=page paginator=paginator %}
                 {% endif %}
 
      </div>
