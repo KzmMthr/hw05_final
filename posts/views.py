@@ -63,11 +63,9 @@ def post_view(request, username, post_id):
     post_count = Post.objects.filter(author=author).count()
     form = CommentForm(request.POST)
     items = Comment.objects.filter(post=post)
-    following = None
-    if request.user.is_active:
-        user = request.user
-        if Follow.objects.filter(user=user, author=author):
-            following = True
+    user = request.user
+    if request.user.is_active and Follow.objects.filter(user=user, author=author):
+        following = True
     return render(
         request, 'post.html',
         {'post': post, 'post_count': post_count, 'post_id': post_id,
@@ -107,8 +105,7 @@ def new_post(request):
 
 @login_required
 def follow_index(request):
-    authors = Follow.objects.select_related('author').filter(user=request.user).values_list('author')
-    post_list = Post.objects.filter(author__in=authors).order_by('-pub_date')
+    post_list = Post.objects.filter(author__following__user=request.user).order_by('-pub_date')
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)

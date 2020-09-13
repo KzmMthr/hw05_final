@@ -27,7 +27,7 @@
                                                 Записей: {{ post_count }}
                                             </div>
                                     </li>
-                                    {% if following is not None  %}
+                                    {% if user.is_authenticated and request.user != author %}
                                     <li class="list-group-item">
                                         {% if following %}
                                         <a class="btn btn-lg btn-light" 

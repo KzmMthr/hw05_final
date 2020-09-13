@@ -6,7 +6,7 @@ from django.core.files.base import File
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Group, Post, User, Follow
+from posts.models import Group, Post, User, Follow, Comment
 
 
 class ProfileTest(TestCase):
@@ -129,17 +129,11 @@ class ProfileTest(TestCase):
                  'image': image, 'group': self.group.id, }, follow=True
                 )
         cache.clear()
-        response = self.client_logged.get(reverse('index'))
-        self.assertNotEqual('post with wrong image', response.context['page'][0].text)
-        self.assertNotIn('<img'.encode(), response.content)
-        test_urls = [
-            reverse('index'),
-            reverse('profile', args=(self.user.username,),),
-            reverse('group', args=(self.group.slug,),),
-        ]
-        for url in test_urls:
-            response = self.client_logged.get(url)
-            self.assertNotIn('<img'.encode(), response.content)
+        error_invalid = [
+            'Загрузите правильное изображение. Файл, который вы загрузили, поврежден или не является изображением.'
+            ]
+        self.assertFormError(response, 'form', 'image', error_invalid)
+        self.assertEqual(Post.objects.filter(text='post with wrong image').count(), 0)
 
     def test_cahce(self):
         response1 = self.client_logged.get(reverse('index'))
@@ -153,7 +147,7 @@ class ProfileTest(TestCase):
     def test_active_user_following(self):
         response = self.client_logged.get(reverse('profile_follow', args=(self.user_1.username,)), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['author'].following.count(), 1)
+        self.assertEqual(Follow.objects.filter(user=self.user).count(), 1)
 
     def test_active_user_unfollowing(self):
         Follow.objects.create(user=self.user, author=self.user_1)
@@ -175,13 +169,15 @@ class ProfileTest(TestCase):
 
     def test_auth_user_may_comments(self):
         Post.objects.create(
-            text='Тестовый пост для проверки комментировать только авторизованному юзеру', author=self.user_1,
+            text='Тестовый пост проверка комментирования', author=self.user_1,
         )
         response = self.client_logged.post(
             reverse('add_comment', kwargs={'username': self.user_1.username, 'post_id': self.post.id, }),
             data={'text': 'Новый коммент123!@#!'}, follow=True
             )
-        self.assertIn('Новый коммент123!@#!', response.content.decode())
+        comment = Comment.objects.get(text='Новый коммент123!@#!')
+        self.assertEqual(comment.author, self.user)
+        self.assertEqual(comment.post.id, self.post.id)
 
     def test_unauth_user_no_comments(self):
         Post.objects.create(
@@ -191,4 +187,4 @@ class ProfileTest(TestCase):
             reverse('add_comment', kwargs={'username': self.user_1.username, 'post_id': self.post.id, }),
             data={'text': 'Новый коммент123!@#!'}, follow=True
             )
-        self.assertNotIn('Новый коммент123!@#!', response.content.decode())
+        self.assertEqual(bool(Comment.objects.filter(text='Новый коммент123!@#!')), False)
