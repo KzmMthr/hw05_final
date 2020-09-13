@@ -147,7 +147,7 @@ class ProfileTest(TestCase):
     def test_active_user_following(self):
         response = self.client_logged.get(reverse('profile_follow', args=(self.user_1.username,)), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Follow.objects.filter(user=self.user).count(), 1)
+        self.assertEqual(Follow.objects.filter(user=self.user, author=self.user_1).count(), 1)
 
     def test_active_user_unfollowing(self):
         Follow.objects.create(user=self.user, author=self.user_1)
@@ -187,4 +187,4 @@ class ProfileTest(TestCase):
             reverse('add_comment', kwargs={'username': self.user_1.username, 'post_id': self.post.id, }),
             data={'text': 'Новый коммент123!@#!'}, follow=True
             )
-        self.assertEqual(bool(Comment.objects.filter(text='Новый коммент123!@#!')), False)
+        self.assertEqual(Comment.objects.filter(text='Новый коммент123!@#!').count(), 0)
