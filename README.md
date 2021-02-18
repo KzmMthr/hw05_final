@@ -4,21 +4,8 @@
 ## Index
 1. [Описание](#описание)
 2. [Пользовательские роли](#пользовательские-роли)
-5. [Доступные методы](#доступные-методы)
-6. [Установка](#установка)
-7. [Технологии](#технологии)
-8. [Участники](#участники)
-
-
-## Установка
-```
-python manage.py runserver
-```
-## Технологии
-- [Python](https://www.python.org/)
-- [Django](https://www.djangoproject.com/)
-- [Django REST framework](https://www.django-rest-framework.org/)
-- [DRF Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/)
+3. [Установка](#установка)
+4. [Технологии](#технологии)
 
 
 ## Описание
